@@ -149,12 +149,13 @@ main { position:relative; z-index:2; }
 }
 .hero > .wrap.hint-wrap { position:relative; height:40px; flex:0 0 auto; }
 .hero-grid {
-  display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.02fr);
-  gap:56px; align-items:center; width:100%;
+  display:grid; grid-template-columns:minmax(0,0.9fr) minmax(0,1.14fr);
+  gap:52px; align-items:center; width:100%;
 }
 @media (max-width:1000px){
   .hero { padding:112px 0 40px; min-height:auto; }
-  .hero-grid { grid-template-columns:1fr; gap:28px; }
+  .hero-grid { grid-template-columns:1fr; gap:30px; }
+  .canvas-frame { aspect-ratio:1.15 / 1; }
 }
 
 .eyebrow {
@@ -204,7 +205,7 @@ h1 .grad {
 /* hero canvas frame */
 .hero-visual { position:relative; }
 .canvas-frame {
-  position:relative; width:100%; aspect-ratio:1.5 / 1;
+  position:relative; width:100%; aspect-ratio:1.28 / 1;
   border-radius:var(--r-lg);
   background:
     radial-gradient(80% 70% at 50% 8%,rgba(91,231,255,.10),transparent 64%),

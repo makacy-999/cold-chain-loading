@@ -872,6 +872,7 @@ function createViewer(canvas, opt) {
     camera.far = radius * 200;
 
     /* 取初始角与自动摆动两端的最远距离，保证旋转时不裁切 */
+    const fitFill = (opt.fitFill != null ? opt.fitFill : 0.82);
     const azList = [az0 - 0.28, az0, az0 + 0.28];
     let worst = 0;
 
@@ -890,7 +891,7 @@ function createViewer(canvas, opt) {
           mx = Math.max(mx, Math.abs(v.x), Math.abs(v.y));
         }
         if (!isFinite(mx) || mx <= 1e-4) break;
-        d = d * (mx / 0.82);
+        d = d * (mx / fitFill);
       }
       worst = Math.max(worst, d);
     }
@@ -1141,7 +1142,7 @@ function initHeroViewer() {
   const canvas = document.getElementById('heroCanvas');
   if (!canvas || !window.THREE) return;
   /* 首屏同样走实物渲染：40 尺高柜 + 装进柜内的华人托盘箱 */
-  const v = createViewer(canvas, { az: 0.8, el: 0.3, autoRotate: true, realistic: true });
+  const v = createViewer(canvas, { az: 0.8, el: 0.3, autoRotate: true, realistic: true, fitFill: 0.9 });
   v.load(SCENES[4]);
   window.__heroViewer = v;
 }
