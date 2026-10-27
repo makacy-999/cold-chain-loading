@@ -1293,9 +1293,17 @@ function labelTexture(lines, o) {
 
 /* 共享材质包（每次 build 重建，避免跨场景残留） */
 function makeKit() {
+  /* 木质件：场景里有一盏青色补光，纯漫反射的木头在背光面会被染成青绿，
+     这里压低环境反射、补一点暖色自发光，让侧面读起来仍是木头本色 */
   return {
-    wood:     new THREE.MeshStandardMaterial({ color: 0x9b7a4b, roughness: 0.86, metalness: 0.02 }),
-    woodDark: new THREE.MeshStandardMaterial({ color: 0x7a5c36, roughness: 0.9,  metalness: 0.02 }),
+    wood:     new THREE.MeshStandardMaterial({
+      color: 0xa8824e, roughness: 0.93, metalness: 0.02,
+      emissive: 0x503717, emissiveIntensity: 0.5, envMapIntensity: 0.3
+    }),
+    woodDark: new THREE.MeshStandardMaterial({
+      color: 0x86683e, roughness: 0.95, metalness: 0.02,
+      emissive: 0x3a2711, emissiveIntensity: 0.5, envMapIntensity: 0.3
+    }),
     metal:    new THREE.MeshStandardMaterial({ color: 0xb7c0ca, roughness: 0.34, metalness: 0.82 }),
     frame:    new THREE.MeshStandardMaterial({ color: 0xccd4dd, roughness: 0.46, metalness: 0.4 }),
     white:    new THREE.MeshStandardMaterial({ color: 0xf3f6f9, roughness: 0.58, metalness: 0.03 }),
@@ -1755,11 +1763,16 @@ function createViewer(canvas, opt) {
       if (mode === 'openPallet') {
         /* --- V3：产品箱直接码放在裸木托盘上 --- */
         const pl = CONT.pallet;
+        /* 相机看向世界原点，取景框高度 = 托盘 + 堆码高度，
+           所以「托盘」和「产品箱」都必须整体下移 h/2，
+           否则堆码顶部会被裁掉（pushBox 直接挂到 world，需在回调里同步偏移） */
+        const yOff = -fitC[1] / 2;
         const load = buildPalletLoad(
           pl.outer[0], pl.outer[2], pl.outer[1],
           s.groups, s.color, kit,
-          (m, x, y, z, i) => pushBox(m, x, y, z, i)
+          (m, x, y, z, i) => pushBox(m, x, y + yOff, z, i)
         );
+        load.position.y = yOff;
         world.add(load);
 
       } else if (isPallet) {
