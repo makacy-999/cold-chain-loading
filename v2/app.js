@@ -15,7 +15,7 @@ const PRODUCT = {
 const CONT = {
   huaren: { key:'huaren', name:'华人托盘箱', inner:[990,1180,790],    outer:[1200,1600,1000], tag:'温控箱' },
   tp:     { key:'tp',     name:'TP1750L',    inner:[1400,1250,1020],  outer:[1530,1570,1120], tag:'温控箱' },
-  ct:     { key:'ct',     name:'40 尺高柜',  inner:[10599,2500,2218], outer:[12192,2896,2438],tag:'集装箱' },
+  ct:     { key:'ct',     name:'40 尺冷柜',  inner:[10599,2500,2218], outer:[12192,2896,2438],tag:'集装箱' },
   /* 裸木托盘：长1200 × 宽800 × 高200；inner 高度取「实际货高」，使利用率=面填充率 */
   pallet:     { key:'pallet',     name:'木托盘', inner:[1200,1116,800], outer:[1200,200,800], tag:'木托盘' },
   pallet_pcv: { key:'pallet_pcv', name:'木托盘', inner:[1200,1160,800], outer:[1200,200,800], tag:'木托盘' }
@@ -83,7 +83,7 @@ const SCENES = [
     color:0x2ed9c8, cssColor:'#2ED9C8'
   },
   {
-    id:'c1', az:-0.42, el:0.52, stage:'集装箱内 · 整柜出运', label:'华人托盘箱 → 40 尺高柜',
+    id:'c1', az:-0.42, el:0.52, stage:'集装箱内 · 整柜出运', label:'华人托盘箱 → 40 尺冷柜',
     cont:CONT.ct, item:PRODUCT.MCV,
     pieceLabel:'温控箱', unitLabel:'支', unitDims:'1200 × 1000 × 1600',
     layers:1, unitsPerPiece:24000,
@@ -95,7 +95,7 @@ const SCENES = [
     color:0x8b8cff, cssColor:'#8B8CFF'
   },
   {
-    id:'c2', az:-0.42, el:0.52, stage:'集装箱内 · 整柜出运', label:'TP1750L → 40 尺高柜',
+    id:'c2', az:-0.42, el:0.52, stage:'集装箱内 · 整柜出运', label:'TP1750L → 40 尺冷柜',
     cont:CONT.ct, item:PRODUCT.MCV,
     pieceLabel:'温控箱', unitLabel:'支', unitDims:'1530 × 1120 × 1570',
     layers:1, unitsPerPiece:52800,
@@ -131,7 +131,7 @@ const SCENES = [
   },
   /* ============ V3 新增：整柜装裸木托盘（托盘上带产品堆码） ============ */
   {
-    id:'p3', az:-0.42, el:0.52, stage:'集装箱内 · 整柜出运', label:'木托盘 → 40 尺高柜',
+    id:'p3', az:-0.42, el:0.52, stage:'集装箱内 · 整柜出运', label:'木托盘 → 40 尺冷柜',
     cont:CONT.ct, item:PRODUCT.MCV,
     pieceLabel:'木托盘', unitLabel:'支', unitDims:'1200 × 800 × 200',
     layers:1, unitsPerPiece:28800, mode:'containerOpenPallet',
@@ -270,7 +270,7 @@ function renderCards() {
       dims:[990,1180,790], rows:[['外径','1200×1000×1600<small>mm</small>'],['有效内径','990×790×1180<small>mm</small>'],['有效容积','0.923<small>m³</small>']] },
     { name:'TP1750L', kick:'温控箱 · 内腔', pill:'cyan', tagPill:'内腔 1400×1020×1250',
       dims:[1400,1250,1020], rows:[['外径','1530×1120×1570<small>mm</small>'],['有效内径','1400×1020×1250<small>mm</small>'],['有效容积','1.785<small>m³</small>']] },
-    { name:'40 尺高柜', kick:'集装箱 · 内腔', pill:'cyan', tagPill:'内腔 10599×2218×2500',
+    { name:'40 尺冷柜', kick:'集装箱 · 内腔', pill:'cyan', tagPill:'内腔 10599×2218×2500',
       dims:[10599,2500,2218], rows:[['有效内径','10599×2218×2500<small>mm</small>'],['有效容积','58.77<small>m³</small>'],['温控箱层高','单层 · 余 900<small>mm</small>']] }
   ];
 
@@ -346,7 +346,7 @@ function renderCompare() {
     return `<div class="cmp-card reveal">
       <div class="cmp-head">
         <h3>${f.label} · 单柜可装载支数</h3>
-        <span class="note">40 尺高柜 · 有效内径 10599×2218×2500 mm</span>
+        <span class="note">40 尺冷柜 · 有效内径 10599×2218×2500 mm</span>
       </div>
       <div class="bar-row">
         <div class="bar-label">华人托盘箱方案</div>
@@ -1296,7 +1296,7 @@ function initStage() {
 function initHeroViewer() {
   const canvas = document.getElementById('heroCanvas');
   if (!canvas || !window.THREE) return;
-  /* 首屏同样走实物渲染：40 尺高柜 + 装进柜内的华人托盘箱 */
+  /* 首屏同样走实物渲染：40 尺冷柜 + 装进柜内的华人托盘箱 */
   const v = createViewer(canvas, { az: 0.8, el: 0.3, autoRotate: true, realistic: true, fitFill: 0.9 });
   /* 首屏用整柜场景（顺序调整后索引会变，按容器类型取，别写死下标） */
   const heroScene = SCENES.find(s => s.cont && s.cont.key === 'ct') || SCENES[SCENES.length - 1];
