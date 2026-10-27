@@ -15,7 +15,10 @@ const PRODUCT = {
 const CONT = {
   huaren: { key:'huaren', name:'华人托盘箱', inner:[990,1180,790],    outer:[1200,1600,1000], tag:'温控箱' },
   tp:     { key:'tp',     name:'TP1750L',    inner:[1400,1250,1020],  outer:[1530,1570,1120], tag:'温控箱' },
-  ct:     { key:'ct',     name:'40 尺高柜',  inner:[10599,2500,2218], outer:[12192,2896,2438],tag:'集装箱' }
+  ct:     { key:'ct',     name:'40 尺高柜',  inner:[10599,2500,2218], outer:[12192,2896,2438],tag:'集装箱' },
+  /* 裸木托盘：长1200 × 宽800 × 高200；inner 高度取「实际货高」，使利用率=面填充率 */
+  pallet:     { key:'pallet',     name:'木托盘', inner:[1200,1116,800], outer:[1200,200,800], tag:'木托盘' },
+  pallet_pcv: { key:'pallet_pcv', name:'木托盘', inner:[1200,1160,800], outer:[1200,200,800], tag:'木托盘' }
 };
 
 const dimText = arr => `${arr[0]} × ${arr[2]} × ${arr[1]}`;
@@ -31,7 +34,7 @@ const dimText = arr => `${arr[0]} × ${arr[2]} × ${arr[1]}`;
    ------------------------------------------------------------------ */
 const SCENES = [
   {
-    id:'a1', az:-0.60, el:0.36, stage:'温控箱内 · 产品装箱', label:'MCV → 华人托盘箱',
+    id:'a1', az:-0.60, el:0.36, stage:'产品装箱 · 温控箱 / 木托盘', label:'MCV → 华人托盘箱',
     cont:CONT.huaren, item:PRODUCT.MCV,
     pieceLabel:'产品箱', unitLabel:'支', unitDims:'427 × 270 × 279',
     layers:4, unitsPerPiece:1200,
@@ -43,7 +46,7 @@ const SCENES = [
     color:0x8b8cff, cssColor:'#8B8CFF'
   },
   {
-    id:'a2', az:-0.60, el:0.36, stage:'温控箱内 · 产品装箱', label:'MCV → TP1750L',
+    id:'a2', az:-0.60, el:0.36, stage:'产品装箱 · 温控箱 / 木托盘', label:'MCV → TP1750L',
     cont:CONT.tp, item:PRODUCT.MCV,
     pieceLabel:'产品箱', unitLabel:'支', unitDims:'427 × 270 × 279',
     layers:4, unitsPerPiece:1200,
@@ -56,7 +59,7 @@ const SCENES = [
     color:0x8b8cff, cssColor:'#8B8CFF'
   },
   {
-    id:'b1', az:-0.60, el:0.36, stage:'温控箱内 · 产品装箱', label:'PCV → 华人托盘箱',
+    id:'b1', az:-0.60, el:0.36, stage:'产品装箱 · 温控箱 / 木托盘', label:'PCV → 华人托盘箱',
     cont:CONT.huaren, item:PRODUCT.PCV,
     pieceLabel:'产品箱', unitLabel:'支', unitDims:'540 × 290 × 290',
     layers:4, unitsPerPiece:200,
@@ -67,7 +70,7 @@ const SCENES = [
     color:0x2ed9c8, cssColor:'#2ED9C8'
   },
   {
-    id:'b2', az:-0.60, el:0.36, stage:'温控箱内 · 产品装箱', label:'PCV → TP1750L',
+    id:'b2', az:-0.60, el:0.36, stage:'产品装箱 · 温控箱 / 木托盘', label:'PCV → TP1750L',
     cont:CONT.tp, item:PRODUCT.PCV,
     pieceLabel:'产品箱', unitLabel:'支', unitDims:'540 × 290 × 290',
     layers:4, unitsPerPiece:200,
@@ -101,8 +104,56 @@ const SCENES = [
     ],
     note:'单排 9 托 —— 1120 边沿柜长、1530 边沿柜宽，单层 1570 高。',
     color:0x9b87ff, cssColor:'#A28FFF'
+  },
+  /* ============ V3 新增：产品直接码放在裸木托盘上 ============ */
+  {
+    id:'p1', az:-0.62, el:0.34, stage:'产品装箱 · 温控箱 / 木托盘', label:'MCV → 木托盘',
+    cont:CONT.pallet, item:PRODUCT.MCV,
+    pieceLabel:'产品箱', unitLabel:'支', unitDims:'427 × 270 × 279',
+    layers:4, unitsPerPiece:1200, mode:'openPallet',
+    groups:[
+      { n:[2,4,1], b:[427,279,270], o:[0,0,0]   },  /* 前排 2 箱横放：427 沿托盘长 */
+      { n:[4,4,1], b:[270,279,427], o:[0,0,270] }   /* 后排 4 箱转 90°：错位补满整面 */
+    ],
+    note:'优化排布：每层 6 箱 —— 前排 2 箱 427 沿托盘长横放，后排 4 箱转 90°（270 沿长）错位补满；共 4 层 = 24 箱/托，面利用率由 48% 提升到 72%。',
+    color:0x8b8cff, cssColor:'#8B8CFF'
+  },
+  {
+    id:'p2', az:-0.62, el:0.34, stage:'产品装箱 · 温控箱 / 木托盘', label:'PCV → 木托盘',
+    cont:CONT.pallet_pcv, item:PRODUCT.PCV,
+    pieceLabel:'产品箱', unitLabel:'支', unitDims:'540 × 290 × 290',
+    layers:4, unitsPerPiece:200, mode:'openPallet',
+    groups:[
+      { n:[2,4,2], b:[540,290,290], o:[0,0,0] }   /* 每层 2×2=4 箱：该托盘面已达几何上限 */
+    ],
+    note:'PCV 箱 540×290 在 1200×800 托盘面上，2×2=4 箱/层已是几何最满（面利用率约 65%）；共 4 层 = 16 箱/托。想再多装只能增加层数。',
+    color:0x2ed9c8, cssColor:'#2ED9C8'
+  },
+  /* ============ V3 新增：整柜装裸木托盘（托盘上带产品堆码） ============ */
+  {
+    id:'p3', az:-0.42, el:0.52, stage:'集装箱内 · 整柜出运', label:'木托盘 → 40 尺高柜',
+    cont:CONT.ct, item:PRODUCT.MCV,
+    pieceLabel:'木托盘', unitLabel:'支', unitDims:'1200 × 800 × 200',
+    layers:1, unitsPerPiece:28800, mode:'containerOpenPallet',
+    groups:[
+      { n:[8,1,1], b:[1200,1316,800], o:[0,0,0]    },  /* 第一排 8 托：1200 沿柜长（1316=托盘200+货高1116） */
+      { n:[8,1,1], b:[1200,1316,800], o:[0,0,800]  }   /* 第二排 8 托：并排占宽 1600 */
+    ],
+    /* 每块木托盘上的产品堆码（MCV：优化为每层 6 箱，4 层 = 24 箱） */
+    palletLoad:{ groups:[
+      { n:[2,4,1], b:[427,279,270], o:[0,0,0]   },
+      { n:[4,4,1], b:[270,279,427], o:[0,0,270] }
+    ], color:0x8b8cff },
+    note:'两排各 8 托（1200 沿柜长、800 沿柜宽），合计 16 托；每托按优化排布码放 MCV 产品箱 24 箱（每层 6 箱 × 4 层），单层放置。',
+    color:0x8b8cff, cssColor:'#8B8CFF'
   }
 ];
+
+/* Tab 顺序：按产品归组 —— 木托盘紧跟在对应产品的 TP1750L 之后 */
+(function reorderScenes() {
+  const order = ['a1', 'a2', 'p1', 'b1', 'b2', 'p2', 'c1', 'c2', 'p3'];
+  SCENES.sort((x, y) => order.indexOf(x.id) - order.indexOf(y.id));
+})();
 
 const piecesOf = s => s.groups.reduce((a, g) => a + g.n[0] * g.n[1] * g.n[2], 0);
 
@@ -541,6 +592,55 @@ function makePalletBox(outer, kit, o) {
   return { group: g, shellParts, body };
 }
 
+/* 裸木托盘底座：与「华人托盘箱」同款木质（kit.wood / kit.woodDark），
+   结构 = 顶面平板 + 3 根垫墩（留叉车孔），总高 palletH（默认 200mm）。
+   origin 在托盘底面中心，便于直接摆到地面/柜底。 */
+function makeWoodPallet(Lx, Wz, palletH, kit) {
+  const g = new THREE.Group();
+  const deck = new THREE.Mesh(new THREE.BoxGeometry(Lx * 0.99, palletH * 0.30, Wz * 0.99), kit.wood);
+  deck.position.y = palletH - palletH * 0.15;
+  deck.castShadow = deck.receiveShadow = true;
+  g.add(deck);
+  for (let i = -1; i <= 1; i++) {
+    const blk = new THREE.Mesh(new THREE.BoxGeometry(Lx * 0.07, palletH * 0.55, Wz * 0.95), kit.woodDark);
+    blk.position.set(i * Lx * 0.4, palletH * 0.275, 0);
+    blk.castShadow = true;
+    g.add(blk);
+  }
+  return g;
+}
+
+/* 把一组产品箱码放到木托盘上，返回 group（origin 在托盘底面中心）。
+   onBox(mesh, x, y, z, i) 用于登记到拆分/点击系统。 */
+function buildPalletLoad(loadL, loadW, palletH, groups, color, kit, onBox) {
+  const g = new THREE.Group();
+  g.add(makeWoodPallet(loadL, loadW, palletH, kit));
+
+  const L = layout({ groups: groups });
+  const offX = -loadL / 2 + (loadL - L.env[0]) / 2 - L.mn[0];
+  const offZ = -loadW / 2 + (loadW - L.env[2]) / 2 - L.mn[2];
+  const offY = palletH - L.mn[1];
+
+  const mat = new THREE.MeshStandardMaterial({
+    color: color, roughness: 0.42, metalness: 0.14,
+    emissive: color, emissiveIntensity: 0.07, envMapIntensity: 0.28
+  });
+  const edgeMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.16 });
+  const geos = groups.map(gp => new THREE.BoxGeometry(gp.b[0] * 0.985, gp.b[1] * 0.985, gp.b[2] * 0.985));
+  const edgeGeos = geos.map(geo => new THREE.EdgesGeometry(geo));
+
+  L.list.forEach((it, i) => {
+    const px = it.p[0] + offX, py = it.p[1] + offY, pz = it.p[2] + offZ;
+    const m = new THREE.Mesh(geos[it.gi], mat);
+    m.castShadow = m.receiveShadow = true;
+    m.position.set(px, py, pz);
+    m.add(new THREE.LineSegments(edgeGeos[it.gi], edgeMat));
+    g.add(m);
+    if (onBox) onBox(m, px, py, pz, i);
+  });
+  return g;
+}
+
 /* 保温集装箱外壳：半透明白色箱体 + 黄色角件 + 制冷机组 + 侧壁品牌字 */
 function makeContainerShell(dims, kit, o) {
   o = o || {};
@@ -693,11 +793,17 @@ function createViewer(canvas, opt) {
     const C = s.cont.inner;
     const L = layout(s);
     const real = !!opt.realistic;
+    const mode = s.mode || '';
     const isCt = s.cont.key === 'ct';
     const isPallet = s.cont.key === 'huaren' || s.cont.key === 'tp';
 
-    /* 取景基准：实物模式下按「外径」框住整套箱体/柜体 */
-    const fitC = real ? s.cont.outer : C;
+    /* 取景基准：实物模式下按「外径」框住整套箱体/柜体。
+       裸托盘场景要把产品堆码高度也算进去，否则会裁掉上半截。 */
+    let fitC;
+    if (real) {
+      if (mode === 'openPallet') fitC = [s.cont.outer[0], s.cont.outer[1] + L.env[1], s.cont.outer[2]];
+      else fitC = s.cont.outer;
+    } else fitC = C;
     fitDim = fitC;
     radius = Math.sqrt(fitC[0] * fitC[0] + fitC[1] * fitC[1] + fitC[2] * fitC[2]) / 2;
 
@@ -774,7 +880,17 @@ function createViewer(canvas, opt) {
       /* ========== 三维推演舞台：实物表现 ========== */
       const kit = makeKit();
 
-      if (isPallet) {
+      if (mode === 'openPallet') {
+        /* --- V3：产品箱直接码放在裸木托盘上 --- */
+        const pl = CONT.pallet;
+        const load = buildPalletLoad(
+          pl.outer[0], pl.outer[2], pl.outer[1],
+          s.groups, s.color, kit,
+          (m, x, y, z, i) => pushBox(m, x, y, z, i)
+        );
+        world.add(load);
+
+      } else if (isPallet) {
         /* --- 产品装箱视图：托盘箱作为外壳 --- */
         const pb = makePalletBox(s.cont.outer, kit, {
           opacity: 0.24,
@@ -801,6 +917,31 @@ function createViewer(canvas, opt) {
           m.position.set(px, py, pz);
           m.add(new THREE.LineSegments(edgeGeos[it.gi], edgeMat));
           pushBox(m, px, py, pz, i);
+        });
+
+      } else if (isCt && mode === 'containerOpenPallet') {
+        /* --- V3：整柜装裸木托盘，每托带产品堆码 --- */
+        const cs = makeContainerShell(s.cont.outer, kit, {
+          opacity: 0.24,
+          ribs: corrugationTexture('#f7fbfe', '#bfcbda', Math.max(18, Math.round(s.cont.outer[0] / 200))),
+          brand: brandLogoTex(), brandAspect: BRAND_LOGO_ASPECT
+        });
+        cs.shellParts.forEach(m => { m.name = 'shellPart'; });
+        world.add(cs.group);
+
+        const pl = CONT.pallet;
+        const plLoad = s.palletLoad || { groups: s.groups, color: s.color };
+        const floorY = -C[1] / 2;
+        L.list.forEach((it, i) => {
+          const cx = it.p[0] + off[0];
+          const cz = it.p[2] + off[2];
+          const unit = buildPalletLoad(
+            pl.outer[0], pl.outer[2], pl.outer[1],
+            plLoad.groups, (plLoad.color != null ? plLoad.color : s.color), kit
+          );
+          unit.position.set(cx, floorY, cz);
+          world.add(unit);
+          pushBox(unit, cx, floorY, cz, i);
         });
 
       } else if (isCt) {
@@ -1144,7 +1285,9 @@ function initHeroViewer() {
   if (!canvas || !window.THREE) return;
   /* 首屏同样走实物渲染：40 尺高柜 + 装进柜内的华人托盘箱 */
   const v = createViewer(canvas, { az: 0.8, el: 0.3, autoRotate: true, realistic: true, fitFill: 0.9 });
-  v.load(SCENES[4]);
+  /* 首屏用整柜场景（顺序调整后索引会变，按容器类型取，别写死下标） */
+  const heroScene = SCENES.find(s => s.cont && s.cont.key === 'ct') || SCENES[SCENES.length - 1];
+  v.load(heroScene);
   window.__heroViewer = v;
 }
 
