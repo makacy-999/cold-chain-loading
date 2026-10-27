@@ -149,13 +149,13 @@ main { position:relative; z-index:2; }
 }
 .hero > .wrap.hint-wrap { position:relative; height:40px; flex:0 0 auto; }
 .hero-grid {
-  display:grid; grid-template-columns:minmax(0,0.9fr) minmax(0,1.14fr);
-  gap:52px; align-items:center; width:100%;
+  display:grid; grid-template-columns:minmax(0,0.82fr) minmax(0,1.25fr);
+  gap:48px; align-items:center; width:100%;
 }
 @media (max-width:1000px){
   .hero { padding:112px 0 40px; min-height:auto; }
   .hero-grid { grid-template-columns:1fr; gap:30px; }
-  .canvas-frame { aspect-ratio:1.15 / 1; }
+  .canvas-frame { aspect-ratio:1.05 / 1; }
 }
 
 .eyebrow {
@@ -205,7 +205,7 @@ h1 .grad {
 /* hero canvas frame */
 .hero-visual { position:relative; }
 .canvas-frame {
-  position:relative; width:100%; aspect-ratio:1.28 / 1;
+  position:relative; width:100%; aspect-ratio:1.12 / 1; min-height:460px;
   border-radius:var(--r-lg);
   background:
     radial-gradient(80% 70% at 50% 8%,rgba(91,231,255,.10),transparent 64%),

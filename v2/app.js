@@ -488,8 +488,8 @@ function makePalletBox(outer, kit, o) {
   /* 白色瓦楞箱体 */
   const transparent = o.opacity != null && o.opacity < 1;
   const bodyMat = o.bodyMat || new THREE.MeshPhysicalMaterial({
-    color: 0xf7fafc, roughness: 0.42, metalness: 0.03, clearcoat: 0.5, clearcoatRoughness: 0.32,
-    emissive: 0xeaf2fa, emissiveIntensity: transparent ? 0.10 : 0.04, envMapIntensity: 0.7,
+    color: 0xd8e1ec, roughness: 0.5, metalness: 0.03, clearcoat: 0.45, clearcoatRoughness: 0.3,
+    emissive: 0xe2e9f2, emissiveIntensity: transparent ? 0.05 : 0.03, envMapIntensity: 0.22,
     transparent, opacity: o.opacity != null ? o.opacity : 1,
     side: THREE.FrontSide, depthWrite: !transparent
   });
@@ -805,7 +805,7 @@ function createViewer(canvas, opt) {
       } else if (isCt) {
         /* --- 整柜视图：实物保温箱 + 实物托盘箱裸装 --- */
         const cs = makeContainerShell(s.cont.outer, kit, {
-          opacity: 0.3,
+          opacity: 0.24,
           ribs: corrugationTexture('#f7fbfe', '#bfcbda', Math.max(18, Math.round(s.cont.outer[0] / 200))),
           brand: brandLogoTex(), brandAspect: BRAND_LOGO_ASPECT
         });
@@ -813,7 +813,7 @@ function createViewer(canvas, opt) {
         world.add(cs.group);
 
         /* 共享一套货物材质，避免 18 件重复建材质 */
-        const itemBodyMat = new THREE.MeshPhysicalMaterial({ color: 0xf6f9fc, roughness: 0.45, metalness: 0.03, clearcoat: 0.4 });
+        const itemBodyMat = new THREE.MeshPhysicalMaterial({ color: 0xdbe4ef, roughness: 0.5, metalness: 0.03, clearcoat: 0.4, envMapIntensity: 0.22 });
         const itemLogo = brandLogoTex();
 
         L.list.forEach((it, i) => {
