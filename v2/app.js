@@ -392,6 +392,34 @@ function roundRect(g, x, y, w, h, r) {
   g.closePath();
 }
 
+/* 程序化「影棚」环境贴图（等距柱状）：柔和渐变天光 + 几处高光斑，
+   经 PMREM 预滤波后作为 IBL，让金属角件 / 清漆白箱产生真实反射，
+   整体读起来像产品实拍而非塑料模型。无需任何外部资源，单文件离线可用。 */
+function makeEnvTexture() {
+  const c = document.createElement('canvas');
+  c.width = 1024; c.height = 512;
+  const g = c.getContext('2d');
+  const grad = g.createLinearGradient(0, 0, 0, 512);
+  grad.addColorStop(0.00, '#bcd8ff');
+  grad.addColorStop(0.42, '#eaf4ff');
+  grad.addColorStop(0.50, '#ffffff');
+  grad.addColorStop(0.58, '#c4cfdb');
+  grad.addColorStop(1.00, '#10161f');
+  g.fillStyle = grad; g.fillRect(0, 0, 1024, 512);
+  const blob = (x, y, r, col) => {
+    const rg = g.createRadialGradient(x, y, 0, x, y, r);
+    rg.addColorStop(0, col); rg.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = rg; g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+  };
+  blob(300, 150, 160, 'rgba(255,255,255,0.92)');
+  blob(720, 120, 130, 'rgba(208,234,255,0.85)');
+  blob(540, 205, 95,  'rgba(255,255,255,0.7)');
+  const t = new THREE.CanvasTexture(c);
+  t.mapping = THREE.EquirectangularReflectionMapping;
+  if (THREE.sRGBEncoding) t.encoding = THREE.sRGBEncoding;
+  return t;
+}
+
 /* 华人品牌徽标：透明底 + 蓝底白字「华人」+ 可选车型副标，用作箱体印刷 Logo */
 function makeBrandLogo(opts) {
   opts = opts || {};
@@ -461,9 +489,9 @@ function makePalletBox(outer, kit, o) {
   const transparent = o.opacity != null && o.opacity < 1;
   const bodyMat = o.bodyMat || new THREE.MeshPhysicalMaterial({
     color: 0xf7fafc, roughness: 0.42, metalness: 0.03, clearcoat: 0.5, clearcoatRoughness: 0.32,
-    emissive: 0xeaf2fa, emissiveIntensity: transparent ? 0.17 : 0.08,
+    emissive: 0xeaf2fa, emissiveIntensity: transparent ? 0.10 : 0.04, envMapIntensity: 0.7,
     transparent, opacity: o.opacity != null ? o.opacity : 1,
-    side: THREE.DoubleSide, depthWrite: !transparent
+    side: THREE.FrontSide, depthWrite: !transparent
   });
   if (o.ribs) bodyMat.map = o.ribs;
   const body = new THREE.Mesh(new THREE.BoxGeometry(Lx * 0.99, bodyH, Wz * 0.99), bodyMat);
@@ -521,10 +549,10 @@ function makeContainerShell(dims, kit, o) {
   const shellParts = [];
 
   const bodyMat = new THREE.MeshPhysicalMaterial({
-    color: 0xf4f8fc, roughness: 0.6, metalness: 0.02, clearcoat: 0.35,
-    emissive: 0xdfe9f2, emissiveIntensity: 0.28,
-    transparent: true, opacity: o.opacity != null ? o.opacity : 0.16,
-    side: THREE.DoubleSide, depthWrite: false
+    color: 0xf4f8fc, roughness: 0.55, metalness: 0.04, clearcoat: 0.55, clearcoatRoughness: 0.25,
+    emissive: 0xdfe9f2, emissiveIntensity: 0.12, envMapIntensity: 0.85,
+    transparent: true, opacity: o.opacity != null ? o.opacity : 0.2,
+    side: THREE.FrontSide, depthWrite: false
   });
   if (o.ribs) bodyMat.map = o.ribs;
   const bodyGeo = new THREE.BoxGeometry(Lx, Hy, Wz);
@@ -592,24 +620,36 @@ function createViewer(canvas, opt) {
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   if ('outputEncoding' in renderer) renderer.outputEncoding = THREE.sRGBEncoding;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 0.92;
+  renderer.toneMappingExposure = 1.04;
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(36, 1, 1, 1e7);
   const world = new THREE.Group();
   scene.add(world);
 
+  /* --- 程序化影棚环境（IBL 反射，让材质更「实拍」）--- */
+  try {
+    if (THREE.PMREMGenerator) {
+      const pmrem = new THREE.PMREMGenerator(renderer);
+      const et = makeEnvTexture();
+      const rt = pmrem.fromEquirectangular(et);
+      scene.environment = rt.texture;
+      et.dispose();
+      pmrem.dispose();
+    }
+  } catch (e) { /* 环境贴图可选，失败不影响渲染 */ }
+
   /* --- 灯光 --- */
-  const hemi = new THREE.HemisphereLight(0xa9d8ff, 0x060a12, 0.42);
+  const hemi = new THREE.HemisphereLight(0xa9d8ff, 0x060a12, 0.34);
   scene.add(hemi);
-  const key = new THREE.DirectionalLight(0xffffff, 0.95);
+  const key = new THREE.DirectionalLight(0xffffff, 1.18);
   key.castShadow = true;
   key.shadow.mapSize.set(2048, 2048);
   key.shadow.bias = -0.0008;
   scene.add(key);
-  const fill = new THREE.DirectionalLight(0x5be7ff, 0.30);
+  const fill = new THREE.DirectionalLight(0x5be7ff, 0.32);
   scene.add(fill);
-  const rim = new THREE.DirectionalLight(0x8b8cff, 0.26);
+  const rim = new THREE.DirectionalLight(0x8b8cff, 0.30);
   scene.add(rim);
 
   /* --- 相机状态 --- */
@@ -664,7 +704,7 @@ function createViewer(canvas, opt) {
     /* 底面（承接投影） */
     const floor = new THREE.Mesh(
       new THREE.PlaneGeometry(fitC[0], fitC[2]),
-      new THREE.MeshStandardMaterial({ color: 0x0c1728, roughness: 0.94, metalness: isCt && real ? 0.18 : 0.0 })
+      new THREE.MeshStandardMaterial({ color: 0x0c1728, roughness: 0.72, metalness: isCt && real ? 0.24 : 0.0 })
     );
     floor.rotation.x = -Math.PI / 2;
     floor.position.y = -fitC[1] / 2 + 0.6;
@@ -701,7 +741,7 @@ function createViewer(canvas, opt) {
       const shell = new THREE.Mesh(shellGeo, new THREE.MeshPhysicalMaterial({
         color: 0x9fd8ff, metalness: 0.0, roughness: 0.22,
         transparent: true, opacity: shellVisible ? 0.045 : 0.0,
-        side: THREE.DoubleSide, depthWrite: false
+        side: THREE.FrontSide, depthWrite: false
       }));
       shell.name = 'shell';
       world.add(shell);
@@ -765,8 +805,8 @@ function createViewer(canvas, opt) {
       } else if (isCt) {
         /* --- 整柜视图：实物保温箱 + 实物托盘箱裸装 --- */
         const cs = makeContainerShell(s.cont.outer, kit, {
-          opacity: 0.17,
-          ribs: corrugationTexture('#f2f7fb', '#d5dee8', Math.round(s.cont.outer[0] / 240)),
+          opacity: 0.3,
+          ribs: corrugationTexture('#f7fbfe', '#bfcbda', Math.max(18, Math.round(s.cont.outer[0] / 200))),
           brand: brandLogoTex(), brandAspect: BRAND_LOGO_ASPECT
         });
         cs.shellParts.forEach(m => { m.name = 'shellPart'; });
