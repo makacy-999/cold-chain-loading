@@ -777,17 +777,18 @@ function createViewer(canvas, opt) {
       if (isPallet) {
         /* --- 产品装箱视图：托盘箱作为外壳 --- */
         const pb = makePalletBox(s.cont.outer, kit, {
-          opacity: 0.30,
+          opacity: 0.24,
           ribs: corrugationTexture('#d5dfea', '#7f93a8', Math.max(14, Math.round(s.cont.outer[0] / 55))),
           logo: brandLogoTex(), logoAspect: BRAND_LOGO_ASPECT, logoScale: 0.66
         });
         pb.shellParts.forEach(m => { m.name = 'shellPart'; });
         world.add(pb.group);
 
-        /* 内部产品箱：还原产品本色（不漂白），压制环境反射避免发虚泛白 */
-        const soft = new THREE.Color(s.color).lerp(new THREE.Color(0xf2f6fa), 0.06);
+        /* 内部产品箱：还原「原版深色」配方 —— 纯产品本色 + 同色微自发光，
+           让颜色厚重饱和（不被白色漂淡），并压低环境反射避免发虚 */
         const mat = new THREE.MeshStandardMaterial({
-          color: soft, roughness: 0.55, metalness: 0.05, envMapIntensity: 0.4
+          color: s.color, roughness: 0.42, metalness: 0.14,
+          emissive: s.color, emissiveIntensity: 0.07, envMapIntensity: 0.28
         });
         const edgeMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.16 });
         const geos = s.groups.map(g => new THREE.BoxGeometry(g.b[0] * 0.985, g.b[1] * 0.985, g.b[2] * 0.985));
