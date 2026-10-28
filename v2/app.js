@@ -16,9 +16,10 @@ const CONT = {
   huaren: { key:'huaren', name:'华人托盘箱', inner:[990,1180,790],    outer:[1200,1600,1000], tag:'温控箱' },
   tp:     { key:'tp',     name:'TP1750L',    inner:[1400,1250,1020],  outer:[1530,1570,1120], tag:'温控箱' },
   ct:     { key:'ct',     name:'40 尺冷柜',  inner:[10599,2500,2218], outer:[12192,2896,2438],tag:'集装箱' },
-  /* 裸木托盘：长1200 × 宽800 × 高200；inner 高度取「实际货高」，使利用率=面填充率 */
-  pallet:     { key:'pallet',     name:'木托盘', inner:[1200,1116,800], outer:[1200,200,800], tag:'木托盘' },
-  pallet_pcv: { key:'pallet_pcv', name:'木托盘', inner:[1200,1160,800], outer:[1200,200,800], tag:'木托盘' }
+  /* 裸木托盘：长1200 × 宽800 × 高200；inner 高度取「实际货高」= 7 层堆码高，
+     使「空间利用率」= 面填充率（MCV 7×279=1953，PCV 7×290=2030） */
+  pallet:     { key:'pallet',     name:'木托盘', inner:[1200,1953,800], outer:[1200,200,800], tag:'木托盘' },
+  pallet_pcv: { key:'pallet_pcv', name:'木托盘', inner:[1200,2030,800], outer:[1200,200,800], tag:'木托盘' }
 };
 
 const dimText = arr => `${arr[0]} × ${arr[2]} × ${arr[1]}`;
@@ -83,7 +84,7 @@ const SCENES = [
     color:0x2ed9c8, cssColor:'#2ED9C8'
   },
   {
-    id:'c1', az:-0.42, el:0.52, stage:'集装箱内 · 整柜出运', label:'华人托盘箱 → 40 尺冷柜',
+    id:'c1', az:-0.42, el:0.52, stage:'集装箱内 · 整柜出运', label:'华人托盘箱(MCV) → 40 尺冷柜',
     cont:CONT.ct, item:PRODUCT.MCV,
     pieceLabel:'温控箱', unitLabel:'支', unitDims:'1200 × 1000 × 1600',
     layers:1, unitsPerPiece:24000,
@@ -91,67 +92,107 @@ const SCENES = [
       { n:[10,1,1], b:[1000,1600,1200], o:[0,0,0]    },  /* 一排 10 托：1000 沿柜长 */
       { n:[8,1,1],  b:[1200,1600,1000], o:[0,0,1200] }   /* 一排 8 托：1200 沿柜长 */
     ],
-    note:'两排并列 —— 一排 10 托（1000 边沿柜长、占宽 1200），一排 8 托（1200 边沿柜长、占宽 1000），合计占宽 2200。单层 1600 高。',
+    note:'两排并列 —— 一排 10 托（1000 边沿柜长、占宽 1200），一排 8 托（1200 边沿柜长、占宽 1000），合计 18 托、占宽 2200，单层 1600 高。每箱装 20 个 MCV 产品箱 ×1200 支 = 24,000 支，整柜 432,000 支。',
     color:0x8b8cff, cssColor:'#8B8CFF'
   },
   {
-    id:'c2', az:-0.42, el:0.52, stage:'集装箱内 · 整柜出运', label:'TP1750L → 40 尺冷柜',
+    id:'c2', az:-0.42, el:0.52, stage:'集装箱内 · 整柜出运', label:'TP1750L(MCV) → 40 尺冷柜',
     cont:CONT.ct, item:PRODUCT.MCV,
     pieceLabel:'温控箱', unitLabel:'支', unitDims:'1530 × 1120 × 1570',
     layers:1, unitsPerPiece:52800,
     groups:[
       { n:[9,1,1], b:[1120,1570,1530], o:[0,0,0] }    /* 单排 9 托：1120 沿柜长 */
     ],
-    note:'单排 9 托 —— 1120 边沿柜长、1530 边沿柜宽，单层 1570 高。',
+    note:'单排 9 托 —— 1120 边沿柜长、1530 边沿柜宽，单层 1570 高。每箱装 44 个 MCV 产品箱 ×1200 支 = 52,800 支，整柜 475,200 支。',
     color:0x9b87ff, cssColor:'#A28FFF'
+  },
+  /* ===== 同一批温控箱换装 PCV：箱数不变，每箱支数不同 ===== */
+  {
+    id:'c1p', az:-0.42, el:0.52, stage:'集装箱内 · 整柜出运', label:'华人托盘箱(PCV) → 40 尺冷柜',
+    cont:CONT.ct, item:PRODUCT.PCV,
+    pieceLabel:'温控箱', unitLabel:'支', unitDims:'1200 × 1000 × 1600',
+    layers:1, unitsPerPiece:2400,
+    groups:[
+      { n:[10,1,1], b:[1000,1600,1200], o:[0,0,0]    },
+      { n:[8,1,1],  b:[1200,1600,1000], o:[0,0,1200] }
+    ],
+    note:'柜内箱数与 MCV 方案完全相同（18 托），差别在箱内：每箱只装 12 个 PCV 产品箱 ×200 支 = 2,400 支，整柜 43,200 支。',
+    color:0x2ed9c8, cssColor:'#2ED9C8'
+  },
+  {
+    id:'c2p', az:-0.42, el:0.52, stage:'集装箱内 · 整柜出运', label:'TP1750L(PCV) → 40 尺冷柜',
+    cont:CONT.ct, item:PRODUCT.PCV,
+    pieceLabel:'温控箱', unitLabel:'支', unitDims:'1530 × 1120 × 1570',
+    layers:1, unitsPerPiece:5600,
+    groups:[
+      { n:[9,1,1], b:[1120,1570,1530], o:[0,0,0] }
+    ],
+    note:'柜内箱数与 MCV 方案完全相同（9 托），差别在箱内：每箱装 28 个 PCV 产品箱 ×200 支 = 5,600 支，整柜 50,400 支。',
+    color:0x2ed9c8, cssColor:'#2ED9C8'
   },
   /* ============ V3 新增：产品直接码放在裸木托盘上 ============ */
   {
     id:'p1', az:-0.62, el:0.34, stage:'产品装箱 · 温控箱 / 木托盘', label:'MCV → 木托盘',
     cont:CONT.pallet, item:PRODUCT.MCV,
     pieceLabel:'产品箱', unitLabel:'支', unitDims:'427 × 270 × 279',
-    layers:4, unitsPerPiece:1200, mode:'openPallet',
+    layers:7, unitsPerPiece:1200, mode:'openPallet',
     groups:[
-      { n:[2,4,1], b:[427,279,270], o:[0,0,0]   },  /* 前排 2 箱横放：427 沿托盘长 */
-      { n:[4,4,1], b:[270,279,427], o:[0,0,270] }   /* 后排 4 箱转 90°：错位补满整面 */
+      { n:[2,7,1], b:[427,279,270], o:[0,0,0]   },  /* 前排 2 箱横放：427 沿托盘长 */
+      { n:[4,7,1], b:[270,279,427], o:[0,0,270] }   /* 后排 4 箱转 90°：错位补满整面 */
     ],
-    note:'优化排布：每层 6 箱 —— 前排 2 箱 427 沿托盘长横放，后排 4 箱转 90°（270 沿长）错位补满；共 4 层 = 24 箱/托，面利用率由 48% 提升到 72%。',
+    note:'每层 6 箱 —— 前排 2 箱 427 沿托盘长横放，后排 4 箱转 90°（270 沿长）错位补满；码 7 层 = 42 箱/托，单托货高 1953，面利用率 72%。',
     color:0x8b8cff, cssColor:'#8B8CFF'
   },
   {
     id:'p2', az:-0.62, el:0.34, stage:'产品装箱 · 温控箱 / 木托盘', label:'PCV → 木托盘',
     cont:CONT.pallet_pcv, item:PRODUCT.PCV,
     pieceLabel:'产品箱', unitLabel:'支', unitDims:'540 × 290 × 290',
-    layers:4, unitsPerPiece:200, mode:'openPallet',
+    layers:7, unitsPerPiece:200, mode:'openPallet',
     groups:[
-      { n:[2,4,2], b:[540,290,290], o:[0,0,0] }   /* 每层 2×2=4 箱：该托盘面已达几何上限 */
+      { n:[2,7,2], b:[540,290,290], o:[0,0,0] }   /* 每层 2×2=4 箱：该托盘面已达几何上限 */
     ],
-    note:'PCV 箱 540×290 在 1200×800 托盘面上，2×2=4 箱/层已是几何最满（面利用率约 65%）；共 4 层 = 16 箱/托。想再多装只能增加层数。',
+    note:'PCV 箱 540×290 在 1200×800 托盘面上，2×2=4 箱/层已是几何最满（面利用率约 65%）；码 7 层 = 28 箱/托，单托货高 2030。',
     color:0x2ed9c8, cssColor:'#2ED9C8'
   },
   /* ============ V3 新增：整柜装裸木托盘（托盘上带产品堆码） ============ */
   {
-    id:'p3', az:-0.42, el:0.52, stage:'集装箱内 · 整柜出运', label:'木托盘 → 40 尺冷柜',
+    id:'p3', az:-0.42, el:0.52, stage:'集装箱内 · 整柜出运', label:'木托盘(MCV) → 40 尺冷柜',
     cont:CONT.ct, item:PRODUCT.MCV,
     pieceLabel:'木托盘', unitLabel:'支', unitDims:'1200 × 800 × 200',
-    layers:1, unitsPerPiece:28800, mode:'containerOpenPallet',
+    layers:1, unitsPerPiece:50400, mode:'containerOpenPallet',
     groups:[
-      { n:[8,1,1], b:[1200,1316,800], o:[0,0,0]    },  /* 第一排 8 托：1200 沿柜长（1316=托盘200+货高1116） */
-      { n:[8,1,1], b:[1200,1316,800], o:[0,0,800]  }   /* 第二排 8 托：并排占宽 1600 */
+      { n:[13,1,1], b:[800,2153,1200], o:[0,0,0]    },  /* 前段 13 托转 90°：800 沿柜长、1200 占柜宽 */
+      { n:[8,1,1],  b:[1200,2153,800], o:[0,0,1200] }   /* 余宽 1018 里顺放 8 托：1200 沿柜长 */
     ],
-    /* 每块木托盘上的产品堆码（MCV：优化为每层 6 箱，4 层 = 24 箱） */
+    /* 每块木托盘上的产品堆码（MCV：每层 6 箱，7 层 = 42 箱，货高 1953） */
     palletLoad:{ groups:[
-      { n:[2,4,1], b:[427,279,270], o:[0,0,0]   },
-      { n:[4,4,1], b:[270,279,427], o:[0,0,270] }
+      { n:[2,7,1], b:[427,279,270], o:[0,0,0]   },
+      { n:[4,7,1], b:[270,279,427], o:[0,0,270] }
     ], color:0x8b8cff },
-    note:'两排各 8 托（1200 沿柜长、800 沿柜宽），合计 16 托；每托按优化排布码放 MCV 产品箱 24 箱（每层 6 箱 × 4 层），单层放置。',
+    note:'单层混排 21 托 —— 13 托转 90°（800 沿柜长，占满 1200 柜宽）+ 余下 1018 宽里顺放 8 托，合计占宽 2000、占长 10400。每托 42 箱 ×1200 支 = 50,400 支，整柜 1,058,400 支。',
     color:0x8b8cff, cssColor:'#8B8CFF'
+  },
+  {
+    id:'p4', az:-0.42, el:0.52, stage:'集装箱内 · 整柜出运', label:'木托盘(PCV) → 40 尺冷柜',
+    cont:CONT.ct, item:PRODUCT.PCV,
+    pieceLabel:'木托盘', unitLabel:'支', unitDims:'1200 × 800 × 200',
+    layers:2, unitsPerPiece:2400, mode:'containerOpenPallet',
+    groups:[
+      { n:[13,1,1], b:[800,1070,1200], o:[0,0,0]    },  /* 底层 13 托：800 沿柜长、1200 占柜宽 */
+      { n:[13,1,1], b:[800,1070,1200], o:[0,1070,0] }   /* 上层 13 托：叠在底层托盘上 */
+    ],
+    /* 双层码放受柜内净高 2500 限制：单托 200 + 3 层×290 = 1070，两层合计 2140 */
+    palletLoad:{ groups:[
+      { n:[2,3,2], b:[540,290,290], o:[0,0,0] }
+    ], color:0x2ed9c8 },
+    note:'双层码放 26 托 —— 地面 13 托 + 上叠 13 托（13×800=10400 沿柜长、1200 占柜宽）。受净高 2500 限制，单托只能码 3 层（12 箱，总高 1070），两层合计 2140。整柜 26 托 ×2,400 支 = 62,400 支。',
+    color:0x2ed9c8, cssColor:'#2ED9C8'
   }
 ];
 
 /* Tab 顺序：按产品归组 —— 木托盘紧跟在对应产品的 TP1750L 之后 */
 (function reorderScenes() {
-  const order = ['a1', 'a2', 'p1', 'b1', 'b2', 'p2', 'c1', 'c2', 'p3'];
+  const order = ['a1', 'a2', 'p1', 'b1', 'b2', 'p2', 'c1', 'c2', 'p3', 'c1p', 'c2p', 'p4'];
   SCENES.sort((x, y) => order.indexOf(x.id) - order.indexOf(y.id));
 })();
 
@@ -944,17 +985,22 @@ function createViewer(canvas, opt) {
 
         const pl = CONT.pallet;
         const plLoad = s.palletLoad || { groups: s.groups, color: s.color };
-        const floorY = -C[1] / 2;
         L.list.forEach((it, i) => {
           const cx = it.p[0] + off[0];
           const cz = it.p[2] + off[2];
+          /* 托盘原点在底面中心，所以取「槽位底面」而不是槽位中心 ——
+             双层码放时上层才会落在下层托盘顶面上，而不是和下层重叠。 */
+          const cy = (it.p[1] - it.b[1] / 2) + off[1];
           const unit = buildPalletLoad(
             pl.outer[0], pl.outer[2], pl.outer[1],
             plLoad.groups, (plLoad.color != null ? plLoad.color : s.color), kit
           );
-          unit.position.set(cx, floorY, cz);
+          unit.position.set(cx, cy, cz);
+          /* 槽位是「转 90°」的（长边沿柜宽），托盘本体也要跟着转，
+             否则 1200 长边会横穿到后一排去。 */
+          if (it.b[0] < it.b[2]) unit.rotation.y = Math.PI / 2;
           world.add(unit);
-          pushBox(unit, cx, floorY, cz, i);
+          pushBox(unit, cx, cy, cz, i);
         });
 
       } else if (isCt) {
