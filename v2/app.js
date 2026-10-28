@@ -327,13 +327,13 @@ function renderTable() {
         <span class="strong">${s.label}</span>
         <span class="sub">${s.cont.tag}内腔 · ${s.alt ? 'MCV / PCV 产品箱混装' : s.item.short + ' 产品箱'}</span>
       </td>
-      <td class="num" data-label="容器内腔">${dimText(s.cont.inner)}</td>
-      <td class="num" data-label="单品尺寸">${s.unitDims}</td>
-      <td class="num lay" data-label="排布"><span>${c.perLayer}<i>/层</i> × ${c.layers}<i>层</i></span></td>
-      <td class="num" data-label="数量">${c.n}<span class="sub">${s.pieceLabel}</span></td>
+      <td class="num" data-label="容器内腔"><span class="v">${dimText(s.cont.inner)}</span></td>
+      <td class="num" data-label="单品尺寸"><span class="v">${s.unitDims}</span></td>
+      <td class="num lay" data-label="排布"><span class="v">${c.perLayer}<i>/层</i> × ${c.layers}<i>层</i></span></td>
+      <td class="num" data-label="数量"><span class="v">${c.n}<span class="sub">${s.pieceLabel}</span></span></td>
       <td class="num" data-label="装载量">${s.alt
-        ? `${fmt(c.units)}<span class="sub">${s.unitLabel} · 全 ${s.item.short}</span><br>${fmt(c.altUnits)}<span class="sub">${s.unitLabel} · 全 ${s.alt.short}</span>`
-        : `${fmt(c.units)}<span class="sub">${s.unitLabel}</span>`}</td>
+        ? `<span class="duo">${fmt(c.units)}<span class="sub">${s.unitLabel} · 全 ${s.item.short}</span><br>${fmt(c.altUnits)}<span class="sub">${s.unitLabel} · 全 ${s.alt.short}</span></span>`
+        : `<span class="v">${fmt(c.units)}<span class="sub">${s.unitLabel}</span></span>`}</td>
       <td data-label="空间利用率">
         <div class="meter">
           <div class="track"><div class="fill" style="width:${(c.util*100).toFixed(1)}%"></div></div>
@@ -362,10 +362,10 @@ function renderCompare() {
       a: c1 * piecesOf(byId('b1')) * PRODUCT.PCV.vial,
       b: c2 * piecesOf(byId('b2')) * PRODUCT.PCV.vial }
   ];
-  const max = Math.max(...fam.flatMap(f => [f.a, f.b]));
-
   host.innerHTML = fam.map(f => {
     const up = (f.b / f.a - 1) * 100;
+    /* 条形按"本组最大值"归一：题干说明即如此，同组两种温控箱的差异才看得清 */
+    const fmax = Math.max(f.a, f.b);
     return `<div class="cmp-card reveal">
       <div class="cmp-head">
         <h3>${f.label} · 单柜可装载支数</h3>
@@ -373,12 +373,12 @@ function renderCompare() {
       </div>
       <div class="bar-row">
         <div class="bar-label">华人托盘箱方案</div>
-        <div class="bar-track"><div class="bar-fill a" data-w="${(f.a/max*100).toFixed(1)}"></div></div>
+        <div class="bar-track"><div class="bar-fill a" data-w="${(f.a/fmax*100).toFixed(1)}"></div></div>
         <div class="bar-val">${fmt(f.a)}<small>支</small></div>
       </div>
       <div class="bar-row">
         <div class="bar-label">TP1750L 方案</div>
-        <div class="bar-track"><div class="bar-fill b" data-w="${(f.b/max*100).toFixed(1)}"></div></div>
+        <div class="bar-track"><div class="bar-fill b" data-w="${(f.b/fmax*100).toFixed(1)}"></div></div>
         <div class="bar-val">${fmt(f.b)}<small>支</small></div>
       </div>
       <div class="cmp-foot">
@@ -1264,12 +1264,12 @@ function initStage() {
     hudSub.textContent = `${s.cont.name} · 内腔 ${dimText(s.cont.inner)} mm`;
 
     hudChips.innerHTML = [
-      `每层 <b>${c.perLayer}</b> 件 · <b>${c.layers}</b> 层`,
-      `${s.pieceLabel} <b>${c.n}</b>`,
-      s.alt ? `装载 <b>${fmt(c.units)}</b> ${s.unitLabel}（全 ${s.item.short}）` : `装载 <b>${fmt(c.units)}</b> ${s.unitLabel}`,
-      s.alt ? `装载 <b>${fmt(c.altUnits)}</b> ${s.unitLabel}（全 ${s.alt.short}）` : null,
-      `空间利用 <b>${(c.util * 100).toFixed(1)}%</b>`
-    ].filter(Boolean).map(t => `<span class="hud-chip">${t}</span>`).join('');
+      ['lay', `每层 <b>${c.perLayer}</b> 件 · <b>${c.layers}</b> 层`],
+      ['pieces', `${s.pieceLabel} <b>${c.n}</b>`],
+      ['units', s.alt ? `装载 <b>${fmt(c.units)}</b> ${s.unitLabel}（全 ${s.item.short}）` : `装载 <b>${fmt(c.units)}</b> ${s.unitLabel}`],
+      s.alt ? ['units2', `装载 <b>${fmt(c.altUnits)}</b> ${s.unitLabel}（全 ${s.alt.short}）`] : null,
+      ['util', `空间利用 <b>${(c.util * 100).toFixed(1)}%</b>`]
+    ].filter(Boolean).map(([k, t]) => `<span class="hud-chip" data-k="${k}">${t}</span>`).join('');
 
     hudNote.innerHTML = `<span class="mk">◆</span><span>${s.note}
       单品 ${s.unitDims} mm（长×宽×高）；剩余空间 长 ${c.rem[0]} / 宽 ${c.rem[2]} / 高 ${c.rem[1]} mm，居中排布后两侧均分。</span>`;
