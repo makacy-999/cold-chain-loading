@@ -479,6 +479,8 @@ td.lay i { font-style:normal; font-size:10.5px; color:var(--ink-4); margin-left:
 }
 .bar-fill.a { background:linear-gradient(90deg,rgba(139,140,255,.85),rgba(139,140,255,.35)); }
 .bar-fill.b { background:linear-gradient(90deg,rgba(46,217,200,.9),rgba(91,231,255,.35)); }
+/* 裸木托盘：暖金，整组里最长的那根，视觉上直接点出「最优解」 */
+.bar-fill.c { background:linear-gradient(90deg,rgba(255,201,108,.95),rgba(255,166,74,.32)); }
 .bar-val {
   font-family:"DIN Alternate",system-ui,sans-serif; font-size:14px; font-variant-numeric:tabular-nums;
   color:var(--ink); min-width:96px; text-align:right; letter-spacing:.01em;
@@ -493,6 +495,10 @@ td.lay i { font-style:normal; font-size:10.5px; color:var(--ink-4); margin-left:
   color:var(--mint); font-variant-numeric:tabular-nums;
   padding:3px 9px; border-radius:6px; border:1px solid rgba(46,217,200,.34); background:rgba(46,217,200,.09);
 }
+.delta.warm {
+  color:#FFD08A; border-color:rgba(255,196,92,.38); background:rgba(255,196,92,.10);
+}
+.cmp-foot-2 { margin-top:10px; padding-top:12px; border-top-style:dashed; }
 
 /* ---------- Footer ---------- */
 .footer { padding:64px 0 48px; border-top:1px solid var(--line-soft); margin-top:40px; position:relative; z-index:2; }

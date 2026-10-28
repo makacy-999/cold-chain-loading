@@ -353,37 +353,42 @@ function renderCompare() {
   const byId = id => SCENES.find(s => s.id === id);
   const c1 = piecesOf(byId('c1')), c2 = piecesOf(byId('c2'));
 
-  /* 单柜支数 = 柜内温控箱数 × 每箱产品箱数 × 单箱支数 */
+  /* 单柜支数 = 柜内温控箱数 × 每箱产品箱数 × 单箱支数；裸木托盘直接取整柜场景的成型结果 */
   const fam = [
     { label:'MCV（流脑）',
       a: c1 * piecesOf(byId('a1')) * PRODUCT.MCV.vial,
-      b: c2 * piecesOf(byId('a2')) * PRODUCT.MCV.vial },
+      b: c2 * piecesOf(byId('a2')) * PRODUCT.MCV.vial,
+      c: calc(byId('p3')).units },
     { label:'PCV（肺炎）',
       a: c1 * piecesOf(byId('b1')) * PRODUCT.PCV.vial,
-      b: c2 * piecesOf(byId('b2')) * PRODUCT.PCV.vial }
+      b: c2 * piecesOf(byId('b2')) * PRODUCT.PCV.vial,
+      c: calc(byId('p4')).units }
   ];
   host.innerHTML = fam.map(f => {
     const up = (f.b / f.a - 1) * 100;
-    /* 条形按"本组最大值"归一：题干说明即如此，同组两种温控箱的差异才看得清 */
-    const fmax = Math.max(f.a, f.b);
+    const up2 = (f.c / f.b - 1) * 100;
+    /* 条形按"本组最大值"归一：题干说明即如此，三种装法的差异才看得清 */
+    const fmax = Math.max(f.a, f.b, f.c);
+    const bar = (cls, label, v) => `<div class="bar-row">
+        <div class="bar-label">${label}</div>
+        <div class="bar-track"><div class="bar-fill ${cls}" data-w="${(v / fmax * 100).toFixed(1)}"></div></div>
+        <div class="bar-val">${fmt(v)}<small>支</small></div>
+      </div>`;
     return `<div class="cmp-card reveal">
       <div class="cmp-head">
         <h3>${f.label} · 单柜可装载支数</h3>
         <span class="note">40 尺冷柜 · 有效内径 10599×2218×2500 mm</span>
       </div>
-      <div class="bar-row">
-        <div class="bar-label">华人托盘箱方案</div>
-        <div class="bar-track"><div class="bar-fill a" data-w="${(f.a/fmax*100).toFixed(1)}"></div></div>
-        <div class="bar-val">${fmt(f.a)}<small>支</small></div>
-      </div>
-      <div class="bar-row">
-        <div class="bar-label">TP1750L 方案</div>
-        <div class="bar-track"><div class="bar-fill b" data-w="${(f.b/fmax*100).toFixed(1)}"></div></div>
-        <div class="bar-val">${fmt(f.b)}<small>支</small></div>
-      </div>
+      ${bar('a', '华人托盘箱方案', f.a)}
+      ${bar('b', 'TP1750L 方案', f.b)}
+      ${bar('c', '裸木托盘方案', f.c)}
       <div class="cmp-foot">
         <span class="delta">+${up.toFixed(1)}%</span>
-        <span>TP1750L 方案单柜多装 ${fmt(f.b - f.a)} 支</span>
+        <span>TP1750L 比华人托盘箱单柜多装 ${fmt(f.b - f.a)} 支</span>
+      </div>
+      <div class="cmp-foot cmp-foot-2">
+        <span class="delta warm">+${up2.toFixed(1)}%</span>
+        <span>裸木托盘再比 TP1750L 多装 ${fmt(f.c - f.b)} 支</span>
       </div>
     </div>`;
   }).join('');
